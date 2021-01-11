@@ -157,7 +157,6 @@ def generate_password(connection,type="new_row",service="",user_id=""):
 
 
 def modify_password(connection):
-    print("These are your saved passwords:")
     get_passwords(connection)
     print("Write in order Service and Username (separated by a space) of the Password you want to change: ", end="")
     params=input()
