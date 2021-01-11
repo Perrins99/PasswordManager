@@ -112,14 +112,13 @@ def passwords_from_service(connection):
     query=f"SELECT * FROM psw_table WHERE service='{service}'"
     execute_query(connection,query)
 
-def generate_password(connection):
+def generate_password(connection,type="new_row",service="",user_id=""):
     while True:
-        print("Write the length of the Password (minimum 8): ",end="")
-        length=input()
-        if length.isdigit():
-            length=int(length)
+        try:
+            print("Write the length of the Password (minimum 8): ",end="")
+            length=int(input())
             break
-        else:
+        except ValueError:
             print("Error. Incorrect length")
 
     characters_set = string.ascii_letters + string.digits + string.punctuation
@@ -135,12 +134,17 @@ def generate_password(connection):
         print("Do you want to save it? (y/n): ",end="")
         answer=input()
         if answer[0]=='y':
-            print("Write in order Service and Username (separated by a space): ",end="")
-            params=input()
-            params=params.split()
-            query= f"INSERT INTO psw_table VALUES ('{params[0]}','{params[1]}','{password}');"
-            execute_query(connection,query,"insert")
-            break
+            if type=="new_row":
+                print("Write in order Service and Username (separated by a space): ",end="")
+                params=input()
+                params=params.split()
+                query= f"INSERT INTO psw_table VALUES ('{params[0]}','{params[1]}','{password}');"
+                execute_query(connection,query,"insert")
+                break
+            else:
+                query= f"UPDATE psw_table SET password='{password}' WHERE service='{service}' AND user_id='{user_id}';"
+                execute_query(connection,query,"update")
+                break
         else:
             if answer[0]=='n':
                 break
@@ -149,6 +153,23 @@ def generate_password(connection):
 
     pyperclip.copy(password)
     print("Password Copied to your clipboard")
+
+
+def modify_password(connection):
+    print("These are your saved passwords:")
+    get_passwords(connection)
+    print("Write in order Service and Username (separated by a space) of the Password you want to change: ", end="")
+    params=input()
+    params=params.split()
+    print("Write the new Password (press 0 to generate a new password): ",end="")
+    answ=input()
+    if answ=='0':
+        generate_password(connection,"update",params[0],params[1])
+    else:
+        query= f"UPDATE psw_table SET password='{answ}' WHERE service='{params[0]}' AND user_id='{params[1]}';"
+        execute_query(connection,query,"update")
+
+
 
 def main():
     
@@ -167,7 +188,8 @@ def main():
         '4': "passwords_from_username(connection)",
         '5': "usernames_from_password(connection)",
         '6': "passwords_from_service(connection)",
-        '7': "generate_password(connection)"
+        '7': "generate_password(connection)",
+        '8': "modify_password(connection)"
     }
     
     while cmd!='0':
@@ -180,6 +202,7 @@ def main():
         print("5) Get all the Usernames from a Password")
         print("6) Get all the Passwords from a Service")
         print("7) Generate a Safe Password")
+        print("8) Modify an existing password") 
         print("0) Exit")
         
         cmd=input()
