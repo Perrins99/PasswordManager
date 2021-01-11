@@ -128,6 +128,7 @@ def generate_password(connection,type="new_row",service="",user_id=""):
     password += secrets.SystemRandom().choice(string.punctuation)
 
     password += ''.join(secrets.SystemRandom().sample(characters_set,length-4))
+    password.replace("'","!")
 
     print("Your new Safe Password is:", password)
     while True:
